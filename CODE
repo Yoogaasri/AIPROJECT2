@@ -1,0 +1,121 @@
+# Import necessary libraries
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
+from sklearn.preprocessing import StandardScaler
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+from sklearn.ensemble import VotingClassifier
+
+# Load your dataset
+# Assuming 'diabetes_data.csv' is your dataset
+data = pd.read_csv('diabetes_data.csv')
+
+# Feature selection and preprocessing
+X = data.drop('Outcome', axis=1)
+y = data['Outcome']
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Standardize the features
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# Ensemble Model - Random Forest
+rf_model = RandomForestClassifier(n_estimators=100, random_state=42)
+rf_model.fit(X_train_scaled, y_train)
+rf_predictions = rf_model.predict(X_test_scaled)
+
+# Deep Learning Model
+model = Sequential()
+model.add(Dense(16, input_dim=X_train_scaled.shape[1], activation='relu'))
+model.add(Dense(8, activation='relu'))
+model.add(Dense(1, activation='sigmoid'))
+
+model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+model.fit(X_train_scaled, y_train, epochs=10, batch_size=32, verbose=1)
+# Get predictions from the deep learning model
+dl_predictions = (model.predict(X_test_scaled) > 0.5).astype(int)
+
+# Combine predictions using an ensemble 
+(Voting Classifier)
+ensemble_model = VotingClassifier(estimators=[
+    ('random_forest', rf_model),
+    ('deep_learning', model)
+], voting='soft')
+
+ensemble_model.fit(X_train_scaled, y_train)
+ensemble_predictions = ensemble_model.predict(X_test_scaled)
+
+# Evaluate models
+
+print("Random Forest Accuracy:", accuracy_score(y_test, rf_predictions))
+print("Deep Learning Accuracy:", accuracy_score(y_test, dl_predictions))
+print("Ensemble Model Accuracy:", accuracy_score(y_test, ensemble_predictions))
+
+# Import necessary libraries
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier, VotingClassifier
+from sklearn.metrics import accuracy_score, classification_report
+from sklearn.preprocessing import StandardScaler
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+
+# Load your dataset
+# Assuming 'diabetes_data.csv' is your dataset
+data = pd.read_csv('diabetes_data.csv')
+
+# Feature selection and preprocessing
+X = data.drop('Outcome', axis=1)
+y = data['Outcome']
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Standardize the features
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# Ensemble Model - Random Forest
+rf_model = RandomForestClassifier(n_estimators=100, random_state=42)
+rf_model.fit(X_train_scaled, y_train)
+rf_predictions = rf_model.predict(X_test_scaled)
+
+# Deep Learning Model
+model = Sequential()
+model.add(Dense(16, input_dim=X_train_scaled.shape[1], activation='relu'))
+model.add(Dense(8, activation='relu'))
+model.add(Dense(1, activation='sigmoid'))
+
+model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+model.fit(X_train_scaled, y_train, epochs=10, batch_size=32, verbose=1)
+
+# Get predictions from the deep learning model
+dl_predictions = (model.predict(X_test_scaled) > 0.5).astype(int)
+
+# Combine predictions using an ensemble (Voting Classifier)
+ensemble_model = VotingClassifier(estimators=[
+    ('random_forest', rf_model),
+    ('deep_learning', model)
+], voting='soft')
+
+ensemble_model.fit(X_train_scaled, y_train)
+ensemble_predictions = ensemble_model.predict(X_test_scaled)
+
+# Evaluate models
+print("Random Forest Accuracy:", accuracy_score(y_test, rf_predictions))
+print("Deep Learning Accuracy:", accuracy_score(y_test, dl_predictions))
+print("Ensemble Model Accuracy:", accuracy_score(y_test, ensemble_predictions))
+
+# Classification Reports
+print("\nRandom Forest Classification Report:\n", classification_report(y_test, rf_predictions))
+print("\nDeep Learning Classification Report:\n", classification_report(y_test, dl_predictions))
+print("\nEnsemble Model Classification Report:\n", classification_report(y_test, ensemble_predictions))
+
